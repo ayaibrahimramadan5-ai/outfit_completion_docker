@@ -1,0 +1,57 @@
+services:
+  # ─────────────────────────────────────────
+  # Ollama — serves the local LLM (mistral) used for
+  # Stage 6 styling explanations
+  # ─────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: outfit_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    restart: unless-stopped
+    # Uncomment below to enable GPU acceleration (requires nvidia-container-toolkit)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # ─────────────────────────────────────────
+  # App — runs Fashion Florence, FashionCLIP, embeddings,
+  # Qdrant (embedded), and orchestrates the full pipeline
+  # ─────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: outfit_app
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_TEXT_MODEL=mistral
+      - CSV_PATH=/app/data/modanisa_products.csv
+      - QDRANT_PATH=/app/data/qdrant_storage
+      - HF_HOME=/app/data/hf_cache
+    volumes:
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+      - hf_cache:/app/data/hf_cache
+    # Uncomment below to enable GPU acceleration for the app container
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    stdin_open: true
+    tty: true
+
+volumes:
+  ollama_models:
+  hf_cache:

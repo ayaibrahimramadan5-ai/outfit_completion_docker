@@ -1,0 +1,11 @@
+# Outfit Completion Pipeline — Requirements
+torch>=2.2.0
+transformers>=4.45.0
+sentence-transformers>=2.6.0
+qdrant-client>=1.9.0
+pandas>=2.0.0
+Pillow>=10.0.0
+requests>=2.31.0
+ollama>=0.2.0
+einops>=0.7.0
+timm>=0.9.0
